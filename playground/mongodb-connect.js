@@ -5,26 +5,26 @@ MongoClient.connect('mongodb://localhost:27017/',{ useNewUrlParser: true },(err,
         if(err){
             return console.log('Unable to connect to Database');
         }
-        console.log('Success'); 
+        console.log('Success');
         var db = client.db('TodoApp');
-        // db.collection('Todos').insertOne({
-        //     text : 'Something',
-        //     completed : true
-        // },(err,result) => {
-        //     if(err){
-        //         return console.log('Error',err);
-        //     }
-        //     console.log(JSON.stringify(result.ops,undefined,2));
-        // });
-        // db.collection('Users').insertOne({
-        //     name : 'Ayush',
-        //     age : 23,
-        //     location : 'Delhi'
-        // },(err,result) => {
-        //     if(err){
-        //         return console.log('Error',err);
-        //     }
-        //     console.log(JSON.stringify(result.ops,undefined,2));
-        // });
+        db.collection('Todos').insertOne({
+            text : 'Something',
+            completed : true
+        },(err,result) => {
+            if(err){
+                return console.log('Error',err);
+            }
+            console.log(JSON.stringify(result.ops,undefined,2));
+        });
+        db.collection('Users').insertOne({
+            name : 'Ayush',
+            age : 23,
+            location : 'Delhi'
+        },(err,result) => {
+            if(err){
+                return console.log('Error',err);
+            }
+            console.log(JSON.stringify(result.ops,undefined,2));
+        });
         client.close();
 });
