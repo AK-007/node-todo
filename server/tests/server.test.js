@@ -6,10 +6,10 @@ const {ObjectId} = require('mongodb');
 
 const todos = [{
     _id : new ObjectId(),
-    text : "First"
+    text : "Initial1"
 }, {
     _id : new ObjectId(),
-    text : "Second",
+    text : "Initial2",
     completed: true,
     completedAt : 333
 }];
@@ -22,21 +22,21 @@ beforeEach((done) => {
 
 describe('POST /todos', () => {
     it('should create a todo', (done) => {
-        var text = 'fghj';
+        const t = "fghj";
         request(app)
             .post('/todos')
-            .send({text})
+            .send({text:t})
             .expect(200)
             .expect((res) => {
-                expect(res.body.text).toBe(text);
+                expect(res.body.todo.text).toBe(t);
             })
             .end((err,res) => {
                 if(err){
                     return done(err);
                 }
-                Todo.find({text}).then((todos) => {
-                    expect(todos.length).toBe(1);
-                    expect(todos[0].text).toBe(text);
+                Todo.find({text:t}).then((tr) => {
+                    expect(tr.length).toBe(1);
+                    expect(tr[0].text).toBe(t);
                     done();
                 }).catch((e) => done(e));
             });
@@ -133,12 +133,12 @@ describe('DELETE /todos/:id' ,() => {
 describe('PATCH /todos/:id',() => {
     it('should update a todo',(done) => {
         var hexId = todos[0]._id.toHexString();
-        var text = 'This is new text';
+        var text = 'This is patch1';
         request(app)
             .patch(`/todos/${hexId}`)
             .send({
                 completed:true,
-                text:text
+                text
             })
             .expect(200)
             .expect((res) => {
@@ -150,7 +150,7 @@ describe('PATCH /todos/:id',() => {
     });
     it('should clear completedAt when todo is not completed',(done) => {
         var hexId = todos[1]._id.toHexString();
-        var text = 'This should be new text';
+        var text = 'This is patch2';
         request(app)
             .patch(`/todos/${hexId}`)
             .send({
