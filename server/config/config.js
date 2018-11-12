@@ -1,9 +1,7 @@
 var env = process.env.NODE_ENV || 'development';
-console.log(env);
-if(env === 'development'){
-    process.env.PORT = 3000;
-    process.env.MONGODB_URI = 'mongodb://localhost:27017/TodoApp';
-} else if(env === 'test'){
-    process.env.PORT = 3000;
-    process.env.MONGODB_URI = 'mongodb://localhost:27017/TodoAppTest';
+if(env === 'development' || env === 'test'){
+    var config = require('./config.json');
+    process.env.PORT = config[env].PORT;
+    process.env.MONGODB_URI = config[env].MONGODB_URI;
+    process.env.JWT_SECRET = config[env].JWT_SECRET;
 }
