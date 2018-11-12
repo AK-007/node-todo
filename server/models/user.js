@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const _=require('lodash');
+var bcrypt = require('bcryptjs');
 var UserSchema = new mongoose.Schema({
     email: {
         type: String,
@@ -31,10 +32,23 @@ var UserSchema = new mongoose.Schema({
         }
     }]
 });
+UserSchema.pre('save',function(next){
+    var user = this;
+    if(user.isModified('password')){
+        bcrypt.genSalt(10,(err,salt) => {
+            bcrypt.hash(user.password,salt,(err,hash) => {
+                user.password = hash;
+                next();
+            });
+        });
+    } else{
+        next();
+    }
+});
 UserSchema.methods.toJSON = function() {
     var user = this;
     var userObject = user.toObject();
-    return _.pick(userObject,['_id','email']);
+    return _.pick(userObject,['_id','email','password']);
 };
 UserSchema.methods.generateAuthToken = function(){
     var user = this;
@@ -44,6 +58,25 @@ UserSchema.methods.generateAuthToken = function(){
     return user.save().then(() => {
         return token;
     });
+};
+UserSchema.statics.findByCredentials = function(email,password){
+    var User = this;
+    return User
+        .findOne({email})
+        .then((user) => {
+            if(!user){
+                return Promise.reject();
+            }
+            return new Promise((resolve,reject) => {
+                bcrypt.compare(password,user.password,(err,res) => {
+                    if(res){
+                        resolve(user);
+                    } else {
+                        reject();
+                    }
+                });
+            });
+        });
 };
 UserSchema.statics.findByToken = function(token){
     var User = this;
@@ -57,6 +90,16 @@ UserSchema.statics.findByToken = function(token){
         _id: decoded._id,
         'tokens.token': token,
         'tokens.access': 'auth'
+    });
+};
+UserSchema.methods.removeToken = function(token){
+    var user = this;
+    return user.update({
+        $pull : {
+            tokens: {
+                token: token
+            }
+        }
     });
 };
 var User = mongoose.model('User', UserSchema);
